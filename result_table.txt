@@ -1,0 +1,141 @@
+SPOOL C:\Users\SHRAVANI\Documents\result_table.txt
+SQL> select * from Sales where rownum <=5;
+
+  ORDER_ID ORDER_DATE                     PRODUCT_ID                            
+---------- ------------------------------ ----------                            
+PRODUCT_NAME                   AMOUNT                                           
+------------------------------ ------------------------------                   
+         1 8/11/2017                               1                            
+Bookcases                      261.96                                           
+                                                                                
+         2 8/11/2017                               2                            
+Chairs                         731.94                                           
+                                                                                
+         3 12/6/2017                               3                            
+Labels                         14.62                                            
+                                                                                
+
+  ORDER_ID ORDER_DATE                     PRODUCT_ID                            
+---------- ------------------------------ ----------                            
+PRODUCT_NAME                   AMOUNT                                           
+------------------------------ ------------------------------                   
+         4 11/10/2016                              4                            
+Tables                         957.5775                                         
+                                                                                
+         5 11/10/2016                              5                            
+Storage                        22.368                                           
+                                                                                
+
+SQL> 
+SQL> ###To check datatypes
+SP2-0734: unknown command beginning "##To check..." - rest of line ignored.
+SQL> DESC Sales;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ORDER_ID                                  NOT NULL NUMBER
+ ORDER_DATE                                         VARCHAR2(30)
+ PRODUCT_ID                                         NUMBER
+ PRODUCT_NAME                                       VARCHAR2(30)
+ AMOUNT                                             VARCHAR2(30)
+
+SQL> ### Since date is string we have to convert it into data-type format
+
+SQL> ####Extract the month of order
+SQL> SELECT ORDER_ID,
+  2         ORDER_DATE,
+  3         EXTRACT(MONTH FROM TO_DATE(ORDER_DATE, 'DD/MM/YYYY')) AS ORDER_MONTH,
+  4         PRODUCT_ID,
+  5         PRODUCT_NAME,
+  6         AMOUNT
+  7  FROM Sales where rownum<=5;
+
+  ORDER_ID ORDER_DATE                     ORDER_MONTH PRODUCT_ID                
+---------- ------------------------------ ----------- ----------                
+PRODUCT_NAME                   AMOUNT                                           
+------------------------------ ------------------------------                   
+         1 8/11/2017                               11          1                
+Bookcases                      261.96                                           
+                                                                                
+         2 8/11/2017                               11          2                
+Chairs                         731.94                                           
+                                                                                
+         3 12/6/2017                                6          3                
+Labels                         14.62                                            
+                                                                                
+
+  ORDER_ID ORDER_DATE                     ORDER_MONTH PRODUCT_ID                
+---------- ------------------------------ ----------- ----------                
+PRODUCT_NAME                   AMOUNT                                           
+------------------------------ ------------------------------                   
+         4 11/10/2016                              10          4                
+Tables                         957.5775                                         
+                                                                                
+         5 11/10/2016                              10          5                
+Storage                        22.368                                           
+                                                                                
+
+SQL> 
+SQL> 
+SQL> ##### Group by year and month
+SQL> ####Calculate  the sum of amount
+SQL> ####Count distinct order ID
+SQL> 
+SQL> ###Since order date is stored into varchar format we need to convert the date into correct format
+SQL> SELECT
+  2      EXTRACT(YEAR FROM TO_DATE(order_date, 'DD/MM/YYYY')) AS year,
+  3      EXTRACT(MONTH FROM TO_DATE(order_date, 'DD/MM/YYYY')) AS month,
+  4      SUM(amount) AS total_revenue,
+  5      COUNT(DISTINCT order_id) AS order_volume
+  6  FROM
+  7      Sales
+  8  WHERE
+  9      REGEXP_LIKE(order_date, '^\d{2}/\d{2}/\d{4}$')
+ 10  GROUP BY
+ 11      EXTRACT(YEAR FROM TO_DATE(order_date, 'DD/MM/YYYY')),
+ 12      EXTRACT(MONTH FROM TO_DATE(order_date, 'DD/MM/YYYY'))
+ 13  ORDER BY
+ 14      year, month;
+
+      YEAR      MONTH TOTAL_REVENUE ORDER_VOLUME                                
+---------- ---------- ------------- ------------                                
+      2015          3        13.456            2                                
+      2015          5          55.5            1                                
+      2015          8       620.816            8                                
+      2015          9       690.308            3                                
+      2015         10       342.138            4                                
+      2015         11       1368.09            5                                
+      2015         12       600.558            1                                
+      2016          1         99.26            3                                
+      2016          4      1424.425            8                                
+      2016          5        251.41            4                                
+      2016          9      4374.064            8                                
+
+      YEAR      MONTH TOTAL_REVENUE ORDER_VOLUME                                
+---------- ---------- ------------- ------------                                
+      2016         10     3003.1735            9                                
+      2016         11      1128.468           11                                
+      2016         12     1286.6172            6                                
+      2017          1       102.218            2                                
+      2017          3       361.104            2                                
+      2017          6        721.89            9                                
+      2017          7        135.12            3                                
+      2017          8       162.388            3                                
+      2017          9        104.78            4                                
+      2017         10       256.196            7                                
+      2017         11        995.11            4                                
+
+      YEAR      MONTH TOTAL_REVENUE ORDER_VOLUME                                
+---------- ---------- ------------- ------------                                
+      2017         12       1045.21            2                                
+      2018          4       112.816            2                                
+      2018          5        301.96            1                                
+      2018          6        51.312            1                                
+      2018          7        71.372            1                                
+      2018          9       278.046            5                                
+      2018         10        55.622            3                                
+      2018         11       335.784            4                                
+      2018         12        881.39            2                                
+
+31 rows selected.
+
+SQL> SPOOL OFF;
